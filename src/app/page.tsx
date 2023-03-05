@@ -1,91 +1,124 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from './page.module.css'
+'use client';
 
-const inter = Inter({ subsets: ['latin'] })
+import gsap from 'gsap';
+import Image from 'next/image';
+import { useEffect, useRef } from 'react';
+import styles from './page.module.css';
 
 export default function Home() {
+  const collectionRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const collection = collectionRef.current;
+    if (collection === null) return;
+
+    const cards = collection.querySelectorAll('div');
+
+    const intervals = Array.from(cards).map((card, i, arr) => {
+      let animateCount = 0;
+      gsap.set(card, {
+        x: -16 * i,
+        y: 16 * i,
+      });
+
+      const interval = setInterval(() => {
+        // 下に着いたら
+        gsap.set(card, {
+          zIndex: (animateCount + i) % arr.length,
+        });
+
+        if (animateCount % arr.length === arr.length - i - 1) {
+          gsap
+            .timeline()
+            .to(card, {
+              x: '-=16',
+              y: '+=16',
+              duration: 1,
+              autoAlpha: 0,
+            })
+            .set(card, {
+              x: 0,
+              y: 0,
+            });
+        } else {
+          gsap.to(card, {
+            x: '-=16',
+            y: '+=16',
+            duration: 1,
+            autoAlpha: 1,
+          });
+        }
+
+        animateCount++;
+      }, 2000);
+
+      return interval;
+    });
+
+    return () => {
+      intervals.forEach(clearInterval);
+    };
+  }, []);
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className={styles.container}>
+      <div className={styles['flash-card-collection']} ref={collectionRef}>
+        <div className={styles['flash-card-item']}>
+          <Image
+            src="https://picsum.photos/id/237/300/200"
+            alt=""
+            width="300"
+            height="200"
+          />
+        </div>
+        <div className={styles['flash-card-item']}>
+          <Image
+            src="https://picsum.photos/id/236/300/200"
+            alt=""
+            width="300"
+            height="200"
+          />
+        </div>
+        <div className={styles['flash-card-item']}>
+          <Image
+            src="https://picsum.photos/id/235/300/200"
+            alt=""
+            width="300"
+            height="200"
+          />
+        </div>
+        <div className={styles['flash-card-item']}>
+          <Image
+            src="https://picsum.photos/id/234/300/200"
+            alt=""
+            width="300"
+            height="200"
+          />
+        </div>
+        <div className={styles['flash-card-item']}>
+          <Image
+            src="https://picsum.photos/id/233/300/200"
+            alt=""
+            width="300"
+            height="200"
+          />
+        </div>
+        <div className={styles['flash-card-item']}>
+          <Image
+            src="https://picsum.photos/id/232/300/200"
+            alt=""
+            width="300"
+            height="200"
+          />
+        </div>
+        <div className={styles['flash-card-item']}>
+          <Image
+            src="https://picsum.photos/id/231/300/200"
+            alt=""
+            width="300"
+            height="200"
+          />
         </div>
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    </div>
+  );
 }
