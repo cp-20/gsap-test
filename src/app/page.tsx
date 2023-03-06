@@ -5,58 +5,68 @@ import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import styles from './page.module.css';
 
+const offset = 16;
+
 export default function Home() {
   const collectionRef = useRef<HTMLDivElement>(null);
+  const rendered = useRef(false);
   useEffect(() => {
+    if (rendered.current) return;
+    rendered.current = true;
+
     const collection = collectionRef.current;
     if (collection === null) return;
 
     const cards = collection.querySelectorAll('div');
 
-    const intervals = Array.from(cards).map((card, i, arr) => {
-      let animateCount = 0;
+    cards.forEach((card, i) => {
+      console.log('register', i);
+
       gsap.set(card, {
-        x: -16 * i,
-        y: 16 * i,
+        x: -offset * i,
+        y: offset * i,
       });
 
-      const interval = setInterval(() => {
-        // 下に着いたら
-        gsap.set(card, {
-          zIndex: (animateCount + i) % arr.length,
-        });
+      const timeline = gsap.timeline({
+        repeat: -1,
+      });
+      for (let j = 1; j <= cards.length; j++) {
+        const position = i + j > cards.length ? i + j - cards.length : i + j;
+        const nextPosition = {
+          x: -offset * position,
+          y: offset * position,
+        };
 
-        if (animateCount % arr.length === arr.length - i - 1) {
-          gsap
-            .timeline()
+        timeline.set(card, { zIndex: position });
+
+        if (position === cards.length) {
+          // 下についたとき
+
+          timeline
             .to(card, {
-              x: '-=16',
-              y: '+=16',
-              duration: 1,
+              ...nextPosition,
               autoAlpha: 0,
+              duration: 1,
+              ease: 'power4.out',
             })
             .set(card, {
               x: 0,
               y: 0,
             });
         } else {
-          gsap.to(card, {
-            x: '-=16',
-            y: '+=16',
-            duration: 1,
+          // それ以外の時
+
+          timeline.to(card, {
+            ...nextPosition,
             autoAlpha: 1,
+            duration: 1,
+            ease: 'power4.out',
           });
         }
 
-        animateCount++;
-      }, 2000);
-
-      return interval;
+        timeline.to(card, { duration: 1 });
+      }
     });
-
-    return () => {
-      intervals.forEach(clearInterval);
-    };
   }, []);
 
   return (
